@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Symulacja lotu pocisku</title>
+
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <h1>Symulacja lotu pocisku</h1>
+
+        <div class="input-data">
+            <div class="single-input">
+                <label>Masa (kg)</label>
+                <input type="number" id="mass" value="10" />
+            </div>
+
+            <div class="single-input">
+                <label>Siła (N)</label>
+                <input type="number" id="force" value="20000" />
+            </div>
+
+            <div class="single-input">
+                <label>Kąt (°)</label>
+                <input type="number" id="angle" value="45" />
+            </div>
+
+            <div class="single-input">
+                <label>&nbsp;</label>
+                <button onclick="startSimulation()">Wystrzel</button>
+            </div>
+        </div>
+
+        <canvas id="canvas" width="900" height="500"></canvas>
+
+        <div class="output">
+            <p id="velocity"></p>
+            <p id="time"></p>
+            <p id="range"></p>
+            <p id="height"></p>
+        </div>
+
+        <div class="signature">Bartłomiej Święs - 2026 - fizyka WSB</footer>
+
+        <script src="app.js"></script>
+    </body>
+</html>
