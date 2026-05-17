@@ -18,13 +18,14 @@ function startSimulation() {
 
     if (isInputCorrect) {
 
-        // Prędkość początkowa - v0 = (F/m)*t
+        // prędkość początkowa - v0 = (F/m)*t
         const initialVelocity = (force / mass) * FORCE_ACTION_TIME;
 
+        // składowe prędskości
         const initialVelocityX = initialVelocity * Math.cos(angle);
         const initialVelocityY = initialVelocity * Math.sin(angle);
 
-        // Czas lotu - t = 2vy / g
+        // czas lotu - t = 2vy / g
         const flightTime = (2 * initialVelocityY) / GRAVITY_ACCELERATION;
         
         // maksymalna wysokosc - ymax = vy^2 / 2g
@@ -33,18 +34,19 @@ function startSimulation() {
         // zasieg lotu - xmax = vx * t
         const rangeX = initialVelocityX * flightTime;
 
+        // wyświetlenie wyników obliczeń
         document.getElementById("velocity").innerText = `Prędkość początkowa: ${initialVelocity.toFixed(2)} m/s`;
         document.getElementById("time").innerText = `Czas lotu: ${flightTime.toFixed(2)} s`;
         document.getElementById("range").innerText = `Zasięg: ${rangeX.toFixed(2)} m`;
         document.getElementById("height").innerText = `Maksymalna wysokość: ${maxHeight.toFixed(2)} m`;
 
-        // Marginesy wykresu
+        // marginesy wykresu
         const chartMarginLeft = 80;
         const chartMarginBottom = 50;
         const chartMarginTop = 30;
         const chartMarginRight = 30;
 
-        // Dynamiczna skala wyresu
+        // dynamiczna skala wyresu
         const scaleX = (canvas.width - chartMarginLeft - chartMarginRight) / (rangeX);
         const scaleY = (canvas.height - chartMarginBottom - chartMarginTop) / (maxHeight);
         const scale = Math.min(scaleX, scaleY);
@@ -58,7 +60,7 @@ function startSimulation() {
             drawGrid(scale, rangeX, maxHeight);
             drawAxes(scale, rangeX, maxHeight);
 
-            // Trajektoria
+            // trajektoria pocisku
             ctx.beginPath();
             ctx.strokeStyle = "#2563eb";
             ctx.lineWidth = 3;
@@ -79,14 +81,14 @@ function startSimulation() {
 
             ctx.stroke();
 
-            // Aktualna pozycja pocisku
+            // aktualna pozycja pocisku
             const currentX = initialVelocityX * flyTime;
             const currentY = initialVelocityY * flyTime - 0.5 * GRAVITY_ACCELERATION * flyTime * flyTime;
 
             const canvasX = chartMarginLeft + currentX * scale;
             const canvasY = canvas.height - chartMarginBottom - currentY * scale;
 
-            // Pocisk
+            // punkt pocisku
             ctx.beginPath();
             ctx.fillStyle = "#dc2626";
             ctx.arc(canvasX, canvasY, 8, 0, Math.PI * 2);
@@ -94,6 +96,7 @@ function startSimulation() {
 
             flyTime += flyTimeChange;
 
+            // sprawdzenie czy pocisk spadł na ziemie
             if (currentY >= 0) {
                 animationId = requestAnimationFrame(animate);
             }
