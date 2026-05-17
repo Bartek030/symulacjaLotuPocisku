@@ -14,30 +14,33 @@ function startSimulation() {
     const angleDegree = parseFloat(document.getElementById("angle").value);
     const angle = (angleDegree * Math.PI) / 180;
 
-    // Prędkość początkowa
-    /*
+    let isInputCorrect = validateInput(mass, force, angleDegree);
+
+    if (isInputCorrect) {
+        // Prędkość początkowa
+        /*
         a = F/m
         v = at
 
         v0 = (f/m)*t
     */
-    const v0 = (force / mass) * FORCE_ACTION_TIME;
+        const v0 = (force / mass) * FORCE_ACTION_TIME;
 
-    const vx = v0 * Math.cos(angle);
-    const vy = v0 * Math.sin(angle);
+        const vx = v0 * Math.cos(angle);
+        const vy = v0 * Math.sin(angle);
 
-    // Parametry lotu
-    /*
+        // Parametry lotu
+        /*
         z równania drogi od czasu - czas lotu dla y = 0
         y(t) = y0 + vy*t + (1/2)gt^2
         y0 = 0
 
         t = 2vy / g
     */
-    const flightTime = (2 * vy) / GRAVITY_ACCELERATION;
-    // x = vt
-    const rangeX = vx * flightTime;
-    /*
+        const flightTime = (2 * vy) / GRAVITY_ACCELERATION;
+        // x = vt
+        const rangeX = vx * flightTime;
+        /*
         z równania prędkości od czasu - dla maksymalnej wysokości v = 0
         v(t) = vy - gt = 0 => maksymalna wysokość dla t = vy/g
 
@@ -47,82 +50,115 @@ function startSimulation() {
         ymax = vy^2/g - (1/2) vy^2/g
         ymax = (1/2)vy^2/g
     */
-    const maxHeight = (vy * vy) / (2 * GRAVITY_ACCELERATION);
+        const maxHeight = (vy * vy) / (2 * GRAVITY_ACCELERATION);
 
-    document.getElementById("velocity").innerText =
-        `Prędkość początkowa: ${v0.toFixed(2)} m/s`;
+        document.getElementById("velocity").innerText =
+            `Prędkość początkowa: ${v0.toFixed(2)} m/s`;
 
-    document.getElementById("time").innerText =
-        `Czas lotu: ${flightTime.toFixed(2)} s`;
+        document.getElementById("time").innerText =
+            `Czas lotu: ${flightTime.toFixed(2)} s`;
 
-    document.getElementById("range").innerText =
-        `Zasięg: ${rangeX.toFixed(2)} m`;
+        document.getElementById("range").innerText =
+            `Zasięg: ${rangeX.toFixed(2)} m`;
 
-    document.getElementById("height").innerText =
-        `Maksymalna wysokość: ${maxHeight.toFixed(2)} m`;
+        document.getElementById("height").innerText =
+            `Maksymalna wysokość: ${maxHeight.toFixed(2)} m`;
 
-    // Marginesy wykresu
-    const chartMarginLeft = 80;
-    const chartMarginBottom = 50;
-    const chartMarginTop = 30;
-    const chartMarginRight = 30;
+        // Marginesy wykresu
+        const chartMarginLeft = 80;
+        const chartMarginBottom = 50;
+        const chartMarginTop = 30;
+        const chartMarginRight = 30;
 
-    // Dynamiczna skala
-    const scaleX = (canvas.width - chartMarginLeft - chartMarginRight) / (rangeX * 1.1);
-    const scaleY = (canvas.height - chartMarginBottom - chartMarginTop) / (maxHeight * 1.3);
-    const scale = Math.min(scaleX, scaleY);
+        // Dynamiczna skala
+        const scaleX =
+            (canvas.width - chartMarginLeft - chartMarginRight) /
+            (rangeX * 1.1);
+        const scaleY =
+            (canvas.height - chartMarginBottom - chartMarginTop) /
+            (maxHeight * 1.3);
+        const scale = Math.min(scaleX, scaleY);
 
-    let time = 0;
-    const dtime = 0.02;
+        let time = 0;
+        const dtime = 0.02;
 
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        drawGrid(scale, rangeX, maxHeight);
-        drawAxes(scale, rangeX, maxHeight);
+            drawGrid(scale, rangeX, maxHeight);
+            drawAxes(scale, rangeX, maxHeight);
 
-        // Trajektoria
-        ctx.beginPath();
-        ctx.strokeStyle = "#2563eb";
-        ctx.lineWidth = 3;
+            // Trajektoria
+            ctx.beginPath();
+            ctx.strokeStyle = "#2563eb";
+            ctx.lineWidth = 3;
 
-        for (let currentTime = 0; currentTime <= time; currentTime += dtime) {
-            const x = vx * currentTime;
-            const y = vy * currentTime - 0.5 * GRAVITY_ACCELERATION * currentTime * currentTime;
+            for (
+                let currentTime = 0;
+                currentTime <= time;
+                currentTime += dtime
+            ) {
+                const x = vx * currentTime;
+                const y =
+                    vy * currentTime -
+                    0.5 * GRAVITY_ACCELERATION * currentTime * currentTime;
+
+                const canvasX = chartMarginLeft + x * scale;
+                const canvasY = canvas.height - chartMarginBottom - y * scale;
+
+                if (currentTime === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+
+            ctx.stroke();
+
+            // Aktualna pozycja pocisku
+            const x = vx * time;
+            const y = vy * time - 0.5 * GRAVITY_ACCELERATION * time * time;
 
             const canvasX = chartMarginLeft + x * scale;
             const canvasY = canvas.height - chartMarginBottom - y * scale;
 
-            if (currentTime === 0) {
-                ctx.moveTo(canvasX, canvasY);
-            } else {
-                ctx.lineTo(canvasX, canvasY);
+            // Pocisk
+            ctx.beginPath();
+            ctx.fillStyle = "#dc2626";
+            ctx.arc(canvasX, canvasY, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            time += dtime;
+
+            if (y >= 0) {
+                animationId = requestAnimationFrame(animate);
             }
         }
 
-        ctx.stroke();
+        animate();
+    } else {
+        alert(
+            `Wprowadź poprawne dane wejściowe:
+            - masa musi być większa od 0
+            - siła musi być większa od 0
+            - kąt musi być w zakresie od 0 do 90 stopni`
+        );
+    }
+}
 
-        // Aktualna pozycja pocisku
-        const x = vx * time;
-        const y = vy * time - 0.5 * GRAVITY_ACCELERATION * time * time;
-
-        const canvasX = chartMarginLeft + x * scale;
-        const canvasY = canvas.height - chartMarginBottom - y * scale;
-
-        // Pocisk
-        ctx.beginPath();
-        ctx.fillStyle = "#dc2626";
-        ctx.arc(canvasX, canvasY, 8, 0, Math.PI * 2);
-        ctx.fill();
-
-        time += dtime;
-
-        if (y >= 0) {
-            animationId = requestAnimationFrame(animate);
-        }
+function validateInput(mass, force, angleDegree) {
+    if (mass <= 0) {
+        return false;
     }
 
-    animate();
+    if (force <= 0) {
+        return false;
+    }
+
+    if (angleDegree < 0 || angleDegree > 90) {
+        return false;
+    }
+    return true;
 }
 
 function drawAxes(scale, range, maxHeight) {
